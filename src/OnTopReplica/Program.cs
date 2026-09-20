@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows.Forms;
 using OnTopReplica.Properties;
 using OnTopReplica.StartupOptions;
+using OnTopReplica.ProfileManagement;
 
 namespace OnTopReplica {
     
@@ -14,6 +15,8 @@ namespace OnTopReplica {
         public static PlatformSupport Platform { get; private set; }
 
         static MainForm _mainForm;
+
+        public static bool IsManagedReplica { get; private set; }
 
         /// <summary>
         /// The main entry point for the application.
@@ -49,6 +52,14 @@ namespace OnTopReplica {
                 Settings.Default.MustUpdate = false;
             }
 
+            //Profile manager is handled before the normal OTR CLI parser.
+            if (ProfileManagerMode.IsRequested(args)) {
+                using (var profileManager = new ProfileManagerForm(ProfileManagerMode.GetRequestedProfile(args), ProfileManagerMode.ShouldAutoApply(args))) {
+                    Application.Run(profileManager);
+                }
+                return;
+            }
+
             //Load startup options
             var options = StartupOptions.Factory.CreateOptions(args);
             string optionsMessage = options.DebugMessage;
@@ -58,6 +69,8 @@ namespace OnTopReplica {
             }
             if (options.Status == CliStatus.Information || options.Status == CliStatus.Error)
                 return;
+
+            IsManagedReplica = options.ManagedReplica;
             
             //Load language
             if (Settings.Default.Language != null &&
@@ -67,10 +80,20 @@ namespace OnTopReplica {
 
             //Show form
             using (_mainForm = new MainForm(options)) {
+                if (IsManagedReplica)
+                    _mainForm.ShowInTaskbar = false;
+
                 Log.Write("Entering application loop");
 
                 //Enter GUI loop
                 Application.Run(_mainForm);
+
+                //Managed profile replicas are disposable view-only workers. They must not
+                //race each other writing the shared OnTopReplica user settings file.
+                if (IsManagedReplica) {
+                    Log.Write("Managed replica ended; skipping settings persistence");
+                    return;
+                }
 
                 //Re-enable chrome to store correct position (position is stored always WITH chrome: when restoring fails, the position stays ok)
                 Settings.Default.RestoreLastShowChrome = _mainForm.IsChromeVisible;
