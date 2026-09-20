@@ -69,6 +69,11 @@ namespace OnTopReplica.MessagePumpProcessors {
         public override void Initialize(MainForm form) {
             base.Initialize(form);
 
+            if (Program.IsManagedReplica) {
+                Enabled = false;
+                return;
+            }
+
             RefreshHotkeys();
         }
 
