@@ -1,0 +1,42 @@
+{
+  "name": "Mining",
+  "windowTitleFilter": "EVE",
+  "roles": [
+    {
+      "name": "Barge",
+      "replicas": [
+        {
+          "name": "Local",
+          "source": { "x": 0, "y": 0, "width": 360, "height": 720 },
+          "output": { "width": 240, "height": 480 },
+          "layout": { "monitorIndex": 1, "originX": 0, "originY": 0, "columns": 9, "gapX": 2, "gapY": 2, "useWorkingArea": false },
+          "clickThrough": true,
+          "borderless": true,
+          "opacity": 255
+        }
+      ]
+    },
+    { "name": "Booster", "replicas": [] },
+    {
+      "name": "Scout",
+      "replicas": [
+        {
+          "name": "Local",
+          "source": { "x": 0, "y": 0, "width": 360, "height": 720 },
+          "output": { "width": 300, "height": 600 },
+          "layout": { "monitorIndex": 1, "originX": 0, "originY": 970, "columns": 2, "gapX": 4, "gapY": 4, "useWorkingArea": false },
+          "clickThrough": true,
+          "borderless": true,
+          "opacity": 255
+        }
+      ]
+    }
+  ],
+  "bindings": [
+    { "character": "Barge01", "role": "Barge", "slot": 1, "enabled": true },
+    { "character": "Barge02", "role": "Barge", "slot": 2, "enabled": true },
+    { "character": "Booster01", "role": "Booster", "slot": 1, "enabled": true },
+    { "character": "Scout01", "role": "Scout", "slot": 1, "enabled": true },
+    { "character": "Scout02", "role": "Scout", "slot": 2, "enabled": true }
+  ]
+}
