@@ -1,3 +1,31 @@
+# OnTopReplica Profiles
+
+This fork extends OnTopReplica Refactor with read-only multi-client profiles and automatic replica layouts.
+
+Development branch: `profiles-v1`.
+
+## Profile manager
+
+Run:
+
+```
+OnTopReplica.exe --profiles
+```
+
+Profiles are read from:
+
+```
+%APPDATA%\OnTopReplica\Profiles
+```
+
+A profile maps source windows to roles and persistent slots. Each role can create zero, one or several DWM replicas. This supports mixed layouts such as 18 mining barges, one booster with no replica, and two scouts with a different layout.
+
+Managed replicas are view-only. The profile build removes the command-line click-forwarding option, hides the legacy click-forwarding UI, and replaces the old mouse-injection implementation with a no-op compatibility stub.
+
+See `examples/Mining.example.json`, `examples/Rampant.example.json`, and `CHANGELOG_PROFILES.md`.
+
+---
+
 > **⚠️ OnTopReplica is archived and will no longer be updated. Check out the new app [OnTop-Windows](https://github.com/giahoki/OnTop-Windows) — rewritten in C++ from scratch!**
 
 # OnTopReplica Refactor
