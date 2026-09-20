@@ -63,6 +63,8 @@ namespace OnTopReplica.StartupOptions {
 
         public bool EnableAutoHideBorder { get; set; }
 
+        public bool ManagedReplica { get; set; }
+
         #endregion
 
         #region Debug info
