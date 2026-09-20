@@ -94,6 +94,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -104,6 +105,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppPaths.cs" />
+    <Compile Include="ProfileManagement\ProfileModels.cs" />
+    <Compile Include="ProfileManagement\ProfileRepository.cs" />
+    <Compile Include="ProfileManagement\WindowDiscovery.cs" />
+    <Compile Include="ProfileManagement\LayoutEngine.cs" />
+    <Compile Include="ProfileManagement\ReplicaProcessManager.cs" />
+    <Compile Include="ProfileManagement\ProfileManagerMode.cs" />
+    <Compile Include="ProfileManagement\ProfileManagerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppStrings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
