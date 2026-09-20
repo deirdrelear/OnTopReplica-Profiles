@@ -1,0 +1,32 @@
+name: build-profiles-v1
+
+on:
+  push:
+    branches: [ "profiles-v1" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore packages
+        run: nuget restore src/OnTopReplica.sln
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Release
+        run: msbuild src/OnTopReplica.sln /m /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Upload portable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: OnTopReplica-Profiles-Release
+          path: |
+            src/OnTopReplica/bin/Release/**
