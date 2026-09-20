@@ -23,12 +23,13 @@ namespace OnTopReplica {
             switchToWindowToolStripMenuItem.Enabled = showing;
             resizeToolStripMenuItem.Enabled = showing;
             chromeToolStripMenuItem.Checked = IsChromeVisible;
-            clickForwardingToolStripMenuItem.Checked = ClickForwardingEnabled;
+            clickForwardingToolStripMenuItem.Checked = false;
+            clickForwardingToolStripMenuItem.Visible = false;
             chromeToolStripMenuItem.Enabled = showing;
             chromeToolStripMenuItem.Visible = !IsAutoHideBorderEnabled;
             autoHideBorderToolStripMenuItem.Checked = IsAutoHideBorderEnabled;
             clickThroughToolStripMenuItem.Enabled = showing;
-            clickForwardingToolStripMenuItem.Enabled = showing;
+            clickForwardingToolStripMenuItem.Enabled = false;
         }
 
         private void Menu_Switch_click(object sender, EventArgs e) {
@@ -48,7 +49,8 @@ namespace OnTopReplica {
         }
 
         private void Menu_ClickForwarding_click(object sender, EventArgs e) {
-            ClickForwardingEnabled = !ClickForwardingEnabled;
+            // Intentionally disabled in read-only build.
+            ClickForwardingEnabled = false;
         }
 
         private void Menu_ClickThrough_click(object sender, EventArgs e) {
