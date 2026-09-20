@@ -1,0 +1,41 @@
+{
+  "name": "Rampant",
+  "windowTitleFilter": "EVE",
+  "roles": [
+    {
+      "name": "Vargur",
+      "replicas": [
+        {
+          "name": "Targets",
+          "source": { "x": 920, "y": 40, "width": 900, "height": 180 },
+          "output": { "width": 900, "height": 180 },
+          "layout": { "monitorIndex": 1, "originX": 0, "originY": 0, "columns": 1, "gapX": 0, "gapY": 4, "useWorkingArea": false },
+          "clickThrough": true, "borderless": true, "opacity": 255
+        },
+        {
+          "name": "HUD",
+          "source": { "x": 730, "y": 650, "width": 460, "height": 420 },
+          "output": { "width": 460, "height": 420 },
+          "layout": { "monitorIndex": 1, "originX": 910, "originY": 0, "columns": 1, "gapX": 0, "gapY": 4, "useWorkingArea": false },
+          "clickThrough": true, "borderless": true, "opacity": 255
+        },
+        {
+          "name": "Modules",
+          "source": { "x": 580, "y": 820, "width": 760, "height": 220 },
+          "output": { "width": 760, "height": 220 },
+          "layout": { "monitorIndex": 1, "originX": 1380, "originY": 0, "columns": 1, "gapX": 0, "gapY": 4, "useWorkingArea": false },
+          "clickThrough": true, "borderless": true, "opacity": 255
+        }
+      ]
+    },
+    { "name": "Support", "replicas": [] }
+  ],
+  "bindings": [
+    { "character": "Vargur01", "role": "Vargur", "slot": 1, "enabled": true },
+    { "character": "Vargur02", "role": "Vargur", "slot": 2, "enabled": true },
+    { "character": "Vargur03", "role": "Vargur", "slot": 3, "enabled": true },
+    { "character": "Vargur04", "role": "Vargur", "slot": 4, "enabled": true },
+    { "character": "Vargur05", "role": "Vargur", "slot": 5, "enabled": true },
+    { "character": "TenguSupport", "role": "Support", "slot": 1, "enabled": true }
+  ]
+}
