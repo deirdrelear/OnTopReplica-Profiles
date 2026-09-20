@@ -85,7 +85,8 @@ namespace OnTopReplica {
         }
 
         void Thumbnail_CloneClick(object sender, CloneClickEventArgs e) {
-            Win32Helper.InjectFakeMouseClick(CurrentThumbnailWindowHandle.Handle, e);
+            // Read-only build: never forward input to the source window.
+            Log.Write("Ignoring clone click because click forwarding is disabled in the read-only build");
         }
 
     }
