@@ -114,6 +114,12 @@
     <Compile Include="ProfileManagement\ProfileManagerForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="ProfileManagement\ProfileEditorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProfileManagement\RegionPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="AppStrings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
