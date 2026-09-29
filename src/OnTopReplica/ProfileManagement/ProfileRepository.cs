@@ -44,13 +44,34 @@ namespace OnTopReplica.ProfileManagement {
             Normalize(profile);
             Validate(profile, profile.Name);
 
-            string safeName = string.Concat((profile.Name ?? "Profile").Select(ch =>
-                Array.IndexOf(Path.GetInvalidFileNameChars(), ch) >= 0 ? '_' : ch));
-            string path = Path.Combine(_folder, safeName + ".json");
+            string path = FindExistingProfilePath(profile.Name);
+            if (path == null) {
+                string safeName = string.Concat((profile.Name ?? "Profile").Select(ch =>
+                    Array.IndexOf(Path.GetInvalidFileNameChars(), ch) >= 0 ? '_' : ch));
+                path = Path.Combine(_folder, safeName + ".json");
+            }
+
             using (var stream = File.Create(path)) {
                 var serializer = new DataContractJsonSerializer(typeof(ProfileDefinition));
                 serializer.WriteObject(stream, profile);
             }
+        }
+
+        string FindExistingProfilePath(string name) {
+            foreach (string file in Directory.GetFiles(_folder, "*.json")) {
+                try {
+                    using (var stream = File.OpenRead(file)) {
+                        var serializer = new DataContractJsonSerializer(typeof(ProfileDefinition));
+                        var existing = serializer.ReadObject(stream) as ProfileDefinition;
+                        if (existing != null && string.Equals(existing.Name, name, StringComparison.OrdinalIgnoreCase))
+                            return file;
+                    }
+                }
+                catch {
+                    // Ignore malformed files here; LoadAll reports them separately.
+                }
+            }
+            return null;
         }
 
         public void EnsureExamples() {
