@@ -2,7 +2,7 @@ name: build-profiles-v1
 
 on:
   push:
-    branches: [ "profiles-v1" ]
+    branches: [ "profiles-v1", "profiles-v2-editor" ]
   pull_request:
     branches: [ "master" ]
 
