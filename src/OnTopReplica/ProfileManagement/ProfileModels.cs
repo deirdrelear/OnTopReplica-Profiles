@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace OnTopReplica.ProfileManagement {
@@ -82,7 +83,9 @@ namespace OnTopReplica.ProfileManagement {
     }
 
     [DataContract]
+    [TypeConverter(typeof(ExpandableObjectConverter))]
     public sealed class RectangleDefinition {
+        public override string ToString() { return X+","+Y+" "+Width+"x"+Height; }
         [DataMember(Name="x", Order=1)] public int X { get; set; }
         [DataMember(Name="y", Order=2)] public int Y { get; set; }
         [DataMember(Name="width", Order=3)] public int Width { get; set; }
@@ -90,13 +93,17 @@ namespace OnTopReplica.ProfileManagement {
     }
 
     [DataContract]
+    [TypeConverter(typeof(ExpandableObjectConverter))]
     public sealed class SizeDefinition {
+        public override string ToString() { return Width+"x"+Height; }
         [DataMember(Name="width", Order=1)] public int Width { get; set; }
         [DataMember(Name="height", Order=2)] public int Height { get; set; }
     }
 
     [DataContract]
+    [TypeConverter(typeof(ExpandableObjectConverter))]
     public sealed class GridLayoutDefinition {
+        public override string ToString() { return "Monitor "+MonitorIndex+", "+Math.Max(1,Columns)+" col"; }
         public GridLayoutDefinition() {
             MonitorIndex = 0;
             Columns = 1;
