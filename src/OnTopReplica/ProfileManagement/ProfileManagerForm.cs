@@ -32,7 +32,11 @@ namespace OnTopReplica.ProfileManagement {
             _timer.Tick+=delegate { Reconcile(); };
             Load+=delegate { _repository.EnsureExamples(); ReloadProfiles(_requestedProfile); };
             Shown+=delegate { if (_autoApplyOnShown) ApplySelected(); };
-            FormClosed+=delegate { _timer.Stop(); _processManager.Dispose(); };
+            FormClosed+=delegate {
+                SavePlacementsIfChanged();
+                _timer.Stop();
+                _processManager.Dispose();
+            };
         }
 
         void BuildUi() {
@@ -45,6 +49,14 @@ namespace OnTopReplica.ProfileManagement {
             reload.Click+=delegate { ReloadProfiles(GetSelectedName()); };
             top.Controls.Add(reload);
 
+            var create=new Button { Text="New profile", AutoSize=true };
+            create.Click+=delegate { EditProfile(null); };
+            top.Controls.Add(create);
+
+            var edit=new Button { Text="Edit profile", AutoSize=true };
+            edit.Click+=delegate { EditProfile(_profiles.SelectedItem as ProfileDefinition); };
+            top.Controls.Add(edit);
+
             var open=new Button { Text="Profiles folder", AutoSize=true };
             open.Click+=delegate { Process.Start("explorer.exe",_repository.FolderPath); };
             top.Controls.Add(open);
@@ -54,7 +66,14 @@ namespace OnTopReplica.ProfileManagement {
             top.Controls.Add(apply);
 
             var stop=new Button { Text="Stop replicas", AutoSize=true };
-            stop.Click+=delegate { _timer.Stop(); _activeProfile=null; _processManager.StopAll(); _grid.Rows.Clear(); _summary.Text="Managed replicas stopped."; };
+            stop.Click+=delegate {
+                SavePlacementsIfChanged();
+                _timer.Stop();
+                _activeProfile=null;
+                _processManager.StopAll();
+                _grid.Rows.Clear();
+                _summary.Text="Managed replicas stopped.";
+            };
             top.Controls.Add(stop);
 
             _autoRecover=new CheckBox { Text="Auto-recover restarted clients", AutoSize=true, Checked=true, Margin=new Padding(12,7,0,0) };
@@ -111,8 +130,35 @@ namespace OnTopReplica.ProfileManagement {
 
         void Reconcile() {
             if (_activeProfile==null) return;
-            try { UpdateGrid(_processManager.Reconcile(_activeProfile,Handle)); }
-            catch(Exception ex) { _summary.Text="Reconcile error: "+ex.Message; Log.WriteException("Profile reconcile failed",ex); }
+            try {
+                UpdateGrid(_processManager.Reconcile(_activeProfile,Handle));
+                SavePlacementsIfChanged();
+            }
+            catch(Exception ex) {
+                _summary.Text="Reconcile error: "+ex.Message;
+                Log.WriteException("Profile reconcile failed",ex);
+            }
+        }
+
+        void SavePlacementsIfChanged() {
+            if (_activeProfile==null) return;
+            try {
+                if (_processManager.CapturePlacements(_activeProfile))
+                    _repository.Save(_activeProfile);
+            }
+            catch(Exception ex) {
+                Log.WriteException("Unable to save replica placement overrides",ex);
+            }
+        }
+
+        void EditProfile(ProfileDefinition profile) {
+            SavePlacementsIfChanged();
+            using (var editor=new ProfileEditorForm(_repository,profile)) {
+                if (editor.ShowDialog(this)==DialogResult.OK) {
+                    string name=editor.Profile==null?null:editor.Profile.Name;
+                    ReloadProfiles(name);
+                }
+            }
         }
 
         void UpdateGrid(IList<BindingRuntimeStatus> rows) {
