@@ -163,6 +163,9 @@ namespace OnTopReplica {
         protected override void OnMouseDoubleClick(MouseEventArgs e) {
             base.OnMouseDoubleClick(e);
 
+            if (Program.IsManagedReplica)
+                return;
+
             //This is handled by the WM_NCLBUTTONDBLCLK msg handler usually (because the GlassForm translates
             //clicks on client to clicks on caption). But if fullscreen mode disables GlassForm dragging, we need
             //this auxiliary handler to switch mode.
@@ -212,6 +215,10 @@ namespace OnTopReplica {
                     break;
 
                 case WM.NCLBUTTONDBLCLK:
+                    if (Program.IsManagedReplica) {
+                        m.Result = IntPtr.Zero;
+                        return;
+                    }
                     //Toggle fullscreen mode if double click on caption (whole glass area)
                     if (m.WParam.ToInt32() == HT.CAPTION) {
                         FullscreenManager.Toggle();
@@ -222,6 +229,13 @@ namespace OnTopReplica {
                     break;
 
                 case WM.NCHITTEST:
+                    //Managed profile replicas are borderless but draggable. Treat their
+                    // entire client surface as a caption; fixed size is enforced separately.
+                    if (Program.IsManagedReplica && _startupOptions.FixedSize && !ClickThroughEnabled) {
+                        m.Result = (IntPtr)HT.CAPTION;
+                        return;
+                    }
+
                     //Make transparent to hit-testing if in click through mode
                     if (ClickThroughEnabled) {
                         m.Result = (IntPtr)HT.TRANSPARENT;
