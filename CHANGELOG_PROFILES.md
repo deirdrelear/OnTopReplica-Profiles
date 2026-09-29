@@ -1,5 +1,16 @@
 # Changelog
 
+## profiles-v2-editor
+
+- Added visual profile editor for roles, character bindings, slots and replica definitions.
+- Added live DWM source-region picker.
+- Added fixed-size, draggable managed replica windows.
+- Added persistent per-character/per-replica manual position overrides.
+- Added New profile / Edit profile actions to Profile Manager.
+- Added AGENTS.md, profile contract and Russian technical specification.
+- Kept read-only boundary: no input forwarding or source-process interaction.
+
+
 ## profiles-v1
 
 - Added JSON profiles with roles, character bindings and persistent slots.
