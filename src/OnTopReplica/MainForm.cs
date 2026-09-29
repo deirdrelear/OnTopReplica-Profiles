@@ -46,6 +46,14 @@ namespace OnTopReplica {
                 Dock = DockStyle.Fill
             };
             _thumbnailPanel.CloneClick += new EventHandler<CloneClickEventArgs>(Thumbnail_CloneClick);
+            if (Program.IsManagedReplica) {
+                // Keep mouse events inside our own window so a borderless managed replica
+                // can be dragged. CloneClick itself is a read-only no-op in this build.
+                _thumbnailPanel.ReportThumbnailClicks = true;
+                _thumbnailPanel.MouseDown += ManagedReplica_MouseDown;
+                _thumbnailPanel.MouseMove += ManagedReplica_MouseMove;
+                _thumbnailPanel.MouseUp += ManagedReplica_MouseUp;
+            }
             Controls.Add(_thumbnailPanel);
 
             //Set native renderer on context menus
@@ -57,6 +65,37 @@ namespace OnTopReplica {
             this.KeyPreview = true;
 
             Log.Write("Main form constructed");
+        }
+
+
+        bool _managedReplicaDragging;
+        Point _managedReplicaDragCursor;
+        Point _managedReplicaDragOrigin;
+
+        void ManagedReplica_MouseDown(object sender, MouseEventArgs e) {
+            if (!Program.IsManagedReplica || ClickThroughEnabled || e.Button != MouseButtons.Left)
+                return;
+            _managedReplicaDragging = true;
+            _managedReplicaDragCursor = Cursor.Position;
+            _managedReplicaDragOrigin = Location;
+            Capture = true;
+        }
+
+        void ManagedReplica_MouseMove(object sender, MouseEventArgs e) {
+            if (!_managedReplicaDragging || !Program.IsManagedReplica || ClickThroughEnabled)
+                return;
+            Point now = Cursor.Position;
+            Location = new Point(
+                _managedReplicaDragOrigin.X + now.X - _managedReplicaDragCursor.X,
+                _managedReplicaDragOrigin.Y + now.Y - _managedReplicaDragCursor.Y
+            );
+        }
+
+        void ManagedReplica_MouseUp(object sender, MouseEventArgs e) {
+            if (e.Button != MouseButtons.Left)
+                return;
+            _managedReplicaDragging = false;
+            Capture = false;
         }
 
         #region Event override
