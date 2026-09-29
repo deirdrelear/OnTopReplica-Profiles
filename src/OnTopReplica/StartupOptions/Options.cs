@@ -65,6 +65,8 @@ namespace OnTopReplica.StartupOptions {
 
         public bool ManagedReplica { get; set; }
 
+        public bool FixedSize { get; set; }
+
         #endregion
 
         #region Debug info
@@ -174,6 +176,11 @@ namespace OnTopReplica.StartupOptions {
 
             //Fix position and size to ensure no white borders
             form.FixPositionAndSize();
+
+            if (FixedSize) {
+                form.MinimumSize = form.Size;
+                form.MaximumSize = form.Size;
+            }
 
             //Other features
             if (EnableClickForwarding) {
