@@ -177,11 +177,6 @@ namespace OnTopReplica.StartupOptions {
             //Fix position and size to ensure no white borders
             form.FixPositionAndSize();
 
-            if (FixedSize) {
-                form.MinimumSize = form.Size;
-                form.MaximumSize = form.Size;
-            }
-
             //Other features
             if (EnableClickForwarding) {
                 form.ClickForwardingEnabled = true;
@@ -198,6 +193,11 @@ namespace OnTopReplica.StartupOptions {
 
             //Fix position and size to ensure no white borders
             form.FixPositionAndSize();
+
+            if (FixedSize) {
+                form.MinimumSize = form.Size;
+                form.MaximumSize = form.Size;
+            }
 
             //Fullscreen
             if (Fullscreen) {
