@@ -20,19 +20,40 @@ namespace OnTopReplica.ProfileManagement {
 
     [DataContract]
     public sealed class RoleDefinition {
-        public RoleDefinition() { Name = "Role"; Replicas = new List<ReplicaDefinition>(); }
+        public RoleDefinition() {
+            Name = "Role";
+            Replicas = new List<ReplicaDefinition>();
+        }
+
         [DataMember(Name="name", Order=1)] public string Name { get; set; }
         [DataMember(Name="replicas", Order=2)] public List<ReplicaDefinition> Replicas { get; set; }
+
+        public override string ToString() {
+            return Name ?? "Role";
+        }
     }
 
     [DataContract]
     public sealed class CharacterBinding {
-        public CharacterBinding() { Enabled = true; Slot = 1; }
+        public CharacterBinding() {
+            Enabled = true;
+            Slot = 1;
+            Placements = new List<ReplicaPlacementDefinition>();
+        }
+
         [DataMember(Name="character", Order=1)] public string Character { get; set; }
         [DataMember(Name="windowTitleContains", Order=2, EmitDefaultValue=false)] public string WindowTitleContains { get; set; }
         [DataMember(Name="role", Order=3)] public string Role { get; set; }
         [DataMember(Name="slot", Order=4)] public int Slot { get; set; }
         [DataMember(Name="enabled", Order=5)] public bool Enabled { get; set; }
+        [DataMember(Name="placements", Order=6, EmitDefaultValue=false)] public List<ReplicaPlacementDefinition> Placements { get; set; }
+    }
+
+    [DataContract]
+    public sealed class ReplicaPlacementDefinition {
+        [DataMember(Name="replica", Order=1)] public string Replica { get; set; }
+        [DataMember(Name="x", Order=2)] public int X { get; set; }
+        [DataMember(Name="y", Order=3)] public int Y { get; set; }
     }
 
     [DataContract]
@@ -42,7 +63,7 @@ namespace OnTopReplica.ProfileManagement {
             Source = new RectangleDefinition();
             Output = new SizeDefinition();
             Layout = new GridLayoutDefinition();
-            ClickThrough = true;
+            ClickThrough = false;
             Borderless = true;
             Opacity = 255;
         }
@@ -54,6 +75,10 @@ namespace OnTopReplica.ProfileManagement {
         [DataMember(Name="clickThrough", Order=5)] public bool ClickThrough { get; set; }
         [DataMember(Name="borderless", Order=6)] public bool Borderless { get; set; }
         [DataMember(Name="opacity", Order=7)] public int Opacity { get; set; }
+
+        public override string ToString() {
+            return Name ?? "Replica";
+        }
     }
 
     [DataContract]
@@ -72,7 +97,12 @@ namespace OnTopReplica.ProfileManagement {
 
     [DataContract]
     public sealed class GridLayoutDefinition {
-        public GridLayoutDefinition() { MonitorIndex=0; Columns=1; UseWorkingArea=false; }
+        public GridLayoutDefinition() {
+            MonitorIndex = 0;
+            Columns = 1;
+            UseWorkingArea = false;
+        }
+
         [DataMember(Name="monitorIndex", Order=1)] public int MonitorIndex { get; set; }
         [DataMember(Name="monitorDeviceName", Order=2, EmitDefaultValue=false)] public string MonitorDeviceName { get; set; }
         [DataMember(Name="originX", Order=3)] public int OriginX { get; set; }
@@ -94,6 +124,7 @@ namespace OnTopReplica.ProfileManagement {
     internal sealed class DesiredReplica {
         public string Key { get; set; }
         public string Character { get; set; }
+        public string ReplicaName { get; set; }
         public IntPtr SourceHandle { get; set; }
         public string Arguments { get; set; }
         public string Signature { get; set; }
