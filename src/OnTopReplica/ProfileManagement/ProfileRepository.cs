@@ -37,6 +37,22 @@ namespace OnTopReplica.ProfileManagement {
             return result;
         }
 
+
+        public void Save(ProfileDefinition profile) {
+            if (profile == null) throw new ArgumentNullException("profile");
+            EnsureFolder();
+            Normalize(profile);
+            Validate(profile, profile.Name);
+
+            string safeName = string.Concat((profile.Name ?? "Profile").Select(ch =>
+                Array.IndexOf(Path.GetInvalidFileNameChars(), ch) >= 0 ? '_' : ch));
+            string path = Path.Combine(_folder, safeName + ".json");
+            using (var stream = File.Create(path)) {
+                var serializer = new DataContractJsonSerializer(typeof(ProfileDefinition));
+                serializer.WriteObject(stream, profile);
+            }
+        }
+
         public void EnsureExamples() {
             EnsureFolder();
             string path = Path.Combine(_folder, "Mining.example.json");
@@ -54,6 +70,9 @@ namespace OnTopReplica.ProfileManagement {
             if (p.Bindings == null) p.Bindings = new List<CharacterBinding>();
             foreach (var role in p.Roles) {
                 if (role.Replicas == null) role.Replicas = new List<ReplicaDefinition>();
+            }
+            foreach (var binding in p.Bindings) {
+                if (binding.Placements == null) binding.Placements = new List<ReplicaPlacementDefinition>();
             }
         }
 
@@ -103,7 +122,7 @@ namespace OnTopReplica.ProfileManagement {
           ""source"": { ""x"": 0, ""y"": 0, ""width"": 360, ""height"": 720 },
           ""output"": { ""width"": 240, ""height"": 480 },
           ""layout"": { ""monitorIndex"": 1, ""originX"": 0, ""originY"": 0, ""columns"": 9, ""gapX"": 2, ""gapY"": 2, ""useWorkingArea"": false },
-          ""clickThrough"": true,
+          ""clickThrough"": false,
           ""borderless"": true,
           ""opacity"": 255
         }
