@@ -122,6 +122,9 @@ namespace OnTopReplica.StartupOptions {
                     options.EnableClickForwarding = false;
                     options.EnableAutoHideBorder = false;
                 })
+                .Add("fixedSize", "Prevents resizing of a managed replica while keeping it movable.", s => {
+                    options.FixedSize = true;
+                })
                 .Add("clickThrough", "Enables click through.", s => {
                     options.EnableClickThrough = true;
                 })
