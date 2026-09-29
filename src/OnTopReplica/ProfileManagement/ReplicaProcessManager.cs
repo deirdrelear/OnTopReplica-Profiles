@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using OnTopReplica.Native;
 
 namespace OnTopReplica.ProfileManagement {
     internal sealed class ReplicaProcessManager : IDisposable {
@@ -12,6 +13,8 @@ namespace OnTopReplica.ProfileManagement {
             public Process Process;
             public string Signature;
             public IntPtr SourceHandle;
+            public string Character;
+            public string ReplicaName;
         }
 
         readonly Dictionary<string, ManagedReplica> _running = new Dictionary<string, ManagedReplica>(StringComparer.OrdinalIgnoreCase);
@@ -59,20 +62,63 @@ namespace OnTopReplica.ProfileManagement {
                 if (_running.ContainsKey(pair.Key)) continue;
                 try {
                     Process p=StartReplica(pair.Value);
-                    _running[pair.Key]=new ManagedReplica { Process=p, Signature=pair.Value.Signature, SourceHandle=pair.Value.SourceHandle };
+                    _running[pair.Key]=new ManagedReplica {
+                        Process=p,
+                        Signature=pair.Value.Signature,
+                        SourceHandle=pair.Value.SourceHandle,
+                        Character=pair.Value.Character,
+                        ReplicaName=pair.Value.ReplicaName
+                    };
                 }
                 catch(Exception ex) {
                     Log.WriteException("Unable to launch managed replica "+pair.Key,ex);
-                    BindingRuntimeStatus s=statuses.FirstOrDefault(x=>string.Equals(x.Character,pair.Value.Character,StringComparison.OrdinalIgnoreCase));
-                    if (s!=null) s.Status="ERROR launching replica: "+ex.Message;
+                    BindingRuntimeStatus st=statuses.FirstOrDefault(x=>string.Equals(x.Character,pair.Value.Character,StringComparison.OrdinalIgnoreCase));
+                    if (st!=null) st.Status="ERROR launching replica: "+ex.Message;
                 }
             }
 
             return statuses;
         }
 
+        public bool CapturePlacements(ProfileDefinition profile) {
+            bool changed=false;
+            foreach (var pair in _running) {
+                ManagedReplica r=pair.Value;
+                if (r.Process==null) continue;
+                try {
+                    if (r.Process.HasExited) continue;
+                    IntPtr hwnd=r.Process.MainWindowHandle;
+                    if (hwnd==IntPtr.Zero) continue;
+                    NRectangle nr;
+                    if (!WindowMethods.GetWindowRect(hwnd,out nr)) continue;
+
+                    CharacterBinding binding=profile.Bindings.FirstOrDefault(b =>
+                        string.Equals(b.Character,r.Character,StringComparison.OrdinalIgnoreCase));
+                    if (binding==null) continue;
+                    if (binding.Placements==null) binding.Placements=new List<ReplicaPlacementDefinition>();
+
+                    ReplicaPlacementDefinition p=binding.Placements.FirstOrDefault(x =>
+                        string.Equals(x.Replica,r.ReplicaName,StringComparison.OrdinalIgnoreCase));
+                    if (p==null) {
+                        p=new ReplicaPlacementDefinition { Replica=r.ReplicaName, X=nr.Left, Y=nr.Top };
+                        binding.Placements.Add(p);
+                        changed=true;
+                    }
+                    else if (p.X!=nr.Left || p.Y!=nr.Top) {
+                        p.X=nr.Left;
+                        p.Y=nr.Top;
+                        changed=true;
+                    }
+                }
+                catch(Exception ex) {
+                    Log.WriteException("Unable to capture managed replica placement "+pair.Key,ex);
+                }
+            }
+            return changed;
+        }
+
         DesiredReplica BuildDesiredReplica(CharacterBinding binding, ReplicaDefinition replica, WindowHandle source) {
-            Point pos=LayoutEngine.ComputePosition(replica,binding.Slot);
+            Point pos=ResolvePosition(binding,replica);
             int opacity=Math.Max(1,Math.Min(255,replica.Opacity));
             var a=new StringBuilder();
             a.Append("--managedReplica ");
@@ -83,15 +129,31 @@ namespace OnTopReplica.ProfileManagement {
             a.Append("--opacity=").Append(opacity).Append(' ');
             if (replica.ClickThrough) a.Append("--clickThrough ");
             if (replica.Borderless) a.Append("--chromeOff ");
+            a.Append("--fixedSize ");
 
             string args=a.ToString().Trim();
+            string signature=source.Handle.ToInt64()+"|"+
+                replica.Source.X+","+replica.Source.Y+","+replica.Source.Width+","+replica.Source.Height+"|"+
+                replica.Output.Width+","+replica.Output.Height+"|"+opacity+"|"+
+                replica.ClickThrough+"|"+replica.Borderless;
+
             return new DesiredReplica {
                 Key=(binding.Character??"")+"|"+(replica.Name??"Replica"),
                 Character=binding.Character,
+                ReplicaName=replica.Name??"Replica",
                 SourceHandle=source.Handle,
                 Arguments=args,
-                Signature=source.Handle.ToInt64()+"|"+args
+                Signature=signature
             };
+        }
+
+        static Point ResolvePosition(CharacterBinding binding, ReplicaDefinition replica) {
+            if (binding.Placements!=null) {
+                ReplicaPlacementDefinition p=binding.Placements.FirstOrDefault(x =>
+                    string.Equals(x.Replica,replica.Name,StringComparison.OrdinalIgnoreCase));
+                if (p!=null) return new Point(p.X,p.Y);
+            }
+            return LayoutEngine.ComputePosition(replica,binding.Slot);
         }
 
         static Process StartReplica(DesiredReplica r) {
