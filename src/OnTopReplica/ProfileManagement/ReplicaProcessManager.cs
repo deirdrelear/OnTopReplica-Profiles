@@ -99,10 +99,18 @@ namespace OnTopReplica.ProfileManagement {
 
                     ReplicaPlacementDefinition p=binding.Placements.FirstOrDefault(x =>
                         string.Equals(x.Replica,r.ReplicaName,StringComparison.OrdinalIgnoreCase));
+                    RoleDefinition role=profile.Roles.FirstOrDefault(x =>
+                        string.Equals(x.Name,binding.Role,StringComparison.OrdinalIgnoreCase));
+                    ReplicaDefinition replica=role==null?null:role.Replicas.FirstOrDefault(x =>
+                        string.Equals(x.Name,r.ReplicaName,StringComparison.OrdinalIgnoreCase));
+
                     if (p==null) {
-                        p=new ReplicaPlacementDefinition { Replica=r.ReplicaName, X=nr.Left, Y=nr.Top };
-                        binding.Placements.Add(p);
-                        changed=true;
+                        Point expected=replica==null?new Point(nr.Left,nr.Top):LayoutEngine.ComputePosition(replica,binding.Slot);
+                        if (Math.Abs(expected.X-nr.Left)>2 || Math.Abs(expected.Y-nr.Top)>2) {
+                            p=new ReplicaPlacementDefinition { Replica=r.ReplicaName, X=nr.Left, Y=nr.Top };
+                            binding.Placements.Add(p);
+                            changed=true;
+                        }
                     }
                     else if (p.X!=nr.Left || p.Y!=nr.Top) {
                         p.X=nr.Left;
